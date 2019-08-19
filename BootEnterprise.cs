@@ -15,22 +15,20 @@ namespace LCU.State.API.NapkinIDE.Setup
 {
     [Serializable]
     [DataContract]
-    public class CommitInfrastructureRequest
+    public class BootEnterpriseRequest
     {
-        [DataMember]
-        public virtual string Template { get; set; }
     }
 
-    public static class CommitInfrastructure
+    public static class BootEnterprise
     {
-        [FunctionName("CommitInfrastructure")]
+        [FunctionName("BootEnterprise")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-			return await req.Manage<CommitInfrastructureRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
+			return await req.Manage<BootEnterpriseRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
-                return await mgr.CommitInfrastructure(reqData.Template);
+                return await mgr.BootEnterprise();
             });
         }
     }

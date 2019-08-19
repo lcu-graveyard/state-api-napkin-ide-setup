@@ -37,16 +37,68 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         #endregion
 
         #region API Methods
-        public virtual async Task<NapkinIDESetupState> CommitInfrastructure(string selectedTemplate)
+        public virtual async Task<NapkinIDESetupState> BootEnterprise()
         {
-            // if (state.InfraTemplate.SelectedTemplate.IsNullOrEmpty())
-            //     state.InfraTemplate.SelectedTemplate = selectedTemplate;
+            await HasDevOpsOAuth();
 
-            // var committed = await devOpsArch.CommitInfrastructure(new Presentation.Personas.DevOps.CommitInfrastructureRequest()
-            // {
-            //     EnvironmentLookup = state.Environment.Lookup,
-            //     SelectedTemplate = state.InfraTemplate.SelectedTemplate,
-            // }, details.EnterpriseAPIKey, state.Environment.Lookup, details.Username);
+            if (state.HasDevOpsOAuth)
+            {
+                //  TODO:  Need a new enterprise api key, what is the first call that does that???  SecureHost?  Can't be anymore, should add a get or create enterprise method or something...
+
+                // var devOpsOAuth = await entMgr.SetupDevOpsOAuthConnection(new Presentation.Personas.Enterprises.SetupDevOpsOAuthConnectionRequest()
+                // {
+                //     DevOpsAppID = devOpsAppId,
+                //     DevOpsClientSecret = devOpsClientSecret,
+                //     DevOpsScopes = devOpsScopes
+                // }, details.EnterpriseAPIKey);
+
+                // var configured = await devOpsArch.ConfigureInfrastructure(new Presentation.Personas.DevOps.ConfigureInfrastructureRequest()
+                // {
+                //     EnvSettings = settings,
+                //     OrganizationLookup = state.GitHub.SelectedOrg,
+                //     InfraType = infraType,
+                //     UseDefaultSettings = useDefaultSettings
+                // }, details.EnterpriseAPIKey, envLookup, details.Username);
+
+                // if (configured.Status)
+                // {
+                //     state.Environment = configured.Model;
+
+                //     var envSettings = await entMgr.GetEnvironmentSettings(details.EnterpriseAPIKey, state.Environment.Lookup);
+
+                //     state.EnvSettings = envSettings.Model;
+                // }
+                // else
+                //     state.Error = configured.Status.Message;
+
+                // if (state.InfraTemplate.SelectedTemplate.IsNullOrEmpty())
+                //     state.InfraTemplate.SelectedTemplate = selectedTemplate;
+
+                // var committed = await devOpsArch.CommitInfrastructure(new Presentation.Personas.DevOps.CommitInfrastructureRequest()
+                // {
+                //     EnvironmentLookup = state.Environment.Lookup,
+                //     SelectedTemplate = state.InfraTemplate.SelectedTemplate,
+                // }, details.EnterpriseAPIKey, state.Environment.Lookup, details.Username);
+
+                // state.Host = host?.ToLower();
+
+                // var acquired = await entArch.SecureHost(new SecureHostRequest()
+                // {
+                //     OrganizationDescription = state.OrganizationDescription,
+                //     OrganizationName = state.OrganizationName
+                // }, details.EnterpriseAPIKey, state.Host);
+
+                // state.HostApprovalMessage = null;
+
+                // if (acquired.Status)
+                // {
+                //     state.Step = StepTypes.Provisioning;
+
+                //     state.Provisioning = "Sit back and relax while we provision your new organization forge. This will configure things to run at the above domain.";
+                // }
+                // else
+                //     state.HostApprovalMessage = acquired.Status.Message;
+            }
 
             return state;
         }
@@ -57,26 +109,16 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             state.EnvSettings = settings;
 
-            await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.AzureOAuth);
+            await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.HostConfig);
 
-            // var configured = await devOpsArch.ConfigureInfrastructure(new Presentation.Personas.DevOps.ConfigureInfrastructureRequest()
-            // {
-            //     EnvSettings = settings,
-            //     OrganizationLookup = state.GitHub.SelectedOrg,
-            //     InfraType = infraType,
-            //     UseDefaultSettings = useDefaultSettings
-            // }, details.EnterpriseAPIKey, envLookup, details.Username);
+            return state;
+        }
 
-            // if (configured.Status)
-            // {
-            //     state.Environment = configured.Model;
+        public virtual async Task<NapkinIDESetupState> HasDevOpsOAuth()
+        {
+            var hasDevOps = await entMgr.HasDevOpsOAuth(details.EnterpriseAPIKey, details.Username);
 
-            //     var envSettings = await entMgr.GetEnvironmentSettings(details.EnterpriseAPIKey, state.Environment.Lookup);
-
-            //     state.EnvSettings = envSettings.Model;
-            // }
-            // else
-            //     state.Error = configured.Status.Message;
+            state.HasDevOpsOAuth = hasDevOps.Status;
 
             return state;
         }
@@ -88,6 +130,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             if (state.OrganizationName.IsNullOrEmpty())
                 await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.OrgDetails);
 
+            await HasDevOpsOAuth();
+
             return state;
         }
 
@@ -98,25 +142,6 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             state.Host = host;
 
             await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Review);
-
-            // state.Host = host?.ToLower();
-
-            // var acquired = await entArch.SecureHost(new SecureHostRequest()
-            // {
-            //     OrganizationDescription = state.OrganizationDescription,
-            //     OrganizationName = state.OrganizationName
-            // }, details.EnterpriseAPIKey, state.Host);
-
-            // state.HostApprovalMessage = null;
-
-            // if (acquired.Status)
-            // {
-            //     state.Step = StepTypes.Provisioning;
-
-            //     state.Provisioning = "Sit back and relax while we provision your new organization forge. This will configure things to run at the above domain.";
-            // }
-            // else
-            //     state.HostApprovalMessage = acquired.Status.Message;
 
             return state;
         }
@@ -157,6 +182,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> SetNapkinIDESetupStep(NapkinIDESetupStepTypes step)
         {
+            await HasDevOpsOAuth();
+
             state.Step = step;
 
             return state;
@@ -164,13 +191,6 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> SetupDevOpsOAuth(string devOpsAppId, string devOpsClientSecret, string devOpsScopes)
         {
-            // var devOpsOAuth = await entMgr.SetupDevOpsOAuthConnection(new Presentation.Personas.Enterprises.SetupDevOpsOAuthConnectionRequest()
-            // {
-            //     DevOpsAppID = devOpsAppId,
-            //     DevOpsClientSecret = devOpsClientSecret,
-            //     DevOpsScopes = devOpsScopes
-            // }, details.EnterpriseAPIKey);
-
             await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.HostConfig);
 
             state.DevOpsAppID = devOpsAppId;

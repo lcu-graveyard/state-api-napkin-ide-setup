@@ -23,6 +23,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         public virtual MetadataModel EnvSettings { get; set; }
         
 		[DataMember]
+        public virtual bool HasDevOpsOAuth { get; set; }
+
+		[DataMember]
         public virtual string Host { get; set; }
 
 		[DataMember]
@@ -68,8 +71,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         [EnumMember]
         AzureSetup,
 
-        [EnumMember]
-        AzureOAuth,
+        // [EnumMember]
+        // AzureOAuth,
 
         [EnumMember]
         HostConfig,
