@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Fathym;
-using LCU.Presentation.Personas.Applications;
-using LCU.Presentation.Personas.Enterprises;
-using LCU.Runtime;
+using LCU.Personas.Client.Applications;
+using LCU.Personas.Client.Enterprises;
 using LCU.State.API.NapkinIDE.Setup.Models;
+using LCU.StateAPI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -44,6 +44,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             if (state.HasDevOpsOAuth)
             {
                 //  TODO:  Need a new enterprise api key, what is the first call that does that???  SecureHost?  Can't be anymore, should add a get or create enterprise method or something...
+
+                //  TODO:  Issue the user the only valid access card
 
                 // var devOpsOAuth = await entMgr.SetupDevOpsOAuthConnection(new Presentation.Personas.Enterprises.SetupDevOpsOAuthConnectionRequest()
                 // {
