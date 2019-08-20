@@ -4,7 +4,11 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Fathym;
 using LCU.Personas.Client.Applications;
+using LCU.Personas.Client.DevOps;
 using LCU.Personas.Client.Enterprises;
+using LCU.Personas.Client.Identity;
+using LCU.Personas.DevOps;
+using LCU.Personas.Enterprises;
 using LCU.State.API.NapkinIDE.Setup.Models;
 using LCU.StateAPI;
 using Microsoft.AspNetCore.Http;
@@ -17,9 +21,13 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         #region Fields
         protected readonly ApplicationManagerClient appMgr;
 
+        protected readonly DevOpsArchitectClient devOpsArch;
+
         protected readonly EnterpriseArchitectClient entArch;
 
         protected readonly EnterpriseManagerClient entMgr;
+
+        protected readonly IdentityManagerClient idMgr;
         #endregion
 
         #region Properties
@@ -30,9 +38,13 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         public NapkinIDESetupStateHarness(HttpRequest req, ILogger logger, NapkinIDESetupState state)
             : base(req, logger, state)
         {
+            devOpsArch = req.ResolveClient<DevOpsArchitectClient>(logger);
+
             entArch = req.ResolveClient<EnterpriseArchitectClient>(logger);
 
             entMgr = req.ResolveClient<EnterpriseManagerClient>(logger);
+
+            idMgr = req.ResolveClient<IdentityManagerClient>(logger);
         }
         #endregion
 
@@ -43,63 +55,60 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             if (state.HasDevOpsOAuth)
             {
-                //  TODO:  Need a new enterprise api key, what is the first call that does that???  SecureHost?  Can't be anymore, should add a get or create enterprise method or something...
+                var entRes = await entArch.CreateEnterprise(new CreateEnterpriseRequest()
+                {
+                    Description = state.OrganizationDescription,
+                    Host = state.Host,
+                    Name = state.OrganizationName
+                }, details.EnterpriseAPIKey, details.Username);
 
-                //  TODO:  Issue the user the only valid access card
+                if (entRes.Status)
+                {
+                    var setup = await devOpsArch.SetupInfrastructure(new SetupInfrastructureRequest()
+                    {
+                        EnvSettings = state.EnvSettings,
+                        OrganizationLookup = state.OrganizationLookup
+                    }, details.EnterpriseAPIKey, details.Username);
 
-                // var devOpsOAuth = await entMgr.SetupDevOpsOAuthConnection(new Presentation.Personas.Enterprises.SetupDevOpsOAuthConnectionRequest()
-                // {
-                //     DevOpsAppID = devOpsAppId,
-                //     DevOpsClientSecret = devOpsClientSecret,
-                //     DevOpsScopes = devOpsScopes
-                // }, details.EnterpriseAPIKey);
+                    // if (configured.Status)
+                    // {
+                    //     state.Environment = configured.Model;
 
-                // var configured = await devOpsArch.ConfigureInfrastructure(new Presentation.Personas.DevOps.ConfigureInfrastructureRequest()
-                // {
-                //     EnvSettings = settings,
-                //     OrganizationLookup = state.GitHub.SelectedOrg,
-                //     InfraType = infraType,
-                //     UseDefaultSettings = useDefaultSettings
-                // }, details.EnterpriseAPIKey, envLookup, details.Username);
+                    //     var envSettings = await entMgr.GetEnvironmentSettings(details.EnterpriseAPIKey, state.Environment.Lookup);
 
-                // if (configured.Status)
-                // {
-                //     state.Environment = configured.Model;
+                    //     state.EnvSettings = envSettings.Model;
+                    // }
+                    // else
+                    //     state.Error = configured.Status.Message;
 
-                //     var envSettings = await entMgr.GetEnvironmentSettings(details.EnterpriseAPIKey, state.Environment.Lookup);
+                    // if (state.InfraTemplate.SelectedTemplate.IsNullOrEmpty())
+                    //     state.InfraTemplate.SelectedTemplate = selectedTemplate;
 
-                //     state.EnvSettings = envSettings.Model;
-                // }
-                // else
-                //     state.Error = configured.Status.Message;
+                    // var committed = await devOpsArch.CommitInfrastructure(new Presentation.Personas.DevOps.CommitInfrastructureRequest()
+                    // {
+                    //     EnvironmentLookup = state.Environment.Lookup,
+                    //     SelectedTemplate = state.InfraTemplate.SelectedTemplate,
+                    // }, details.EnterpriseAPIKey, state.Environment.Lookup, details.Username);
 
-                // if (state.InfraTemplate.SelectedTemplate.IsNullOrEmpty())
-                //     state.InfraTemplate.SelectedTemplate = selectedTemplate;
+                    // state.Host = host?.ToLower();
 
-                // var committed = await devOpsArch.CommitInfrastructure(new Presentation.Personas.DevOps.CommitInfrastructureRequest()
-                // {
-                //     EnvironmentLookup = state.Environment.Lookup,
-                //     SelectedTemplate = state.InfraTemplate.SelectedTemplate,
-                // }, details.EnterpriseAPIKey, state.Environment.Lookup, details.Username);
+                    // var acquired = await entArch.SecureHost(new SecureHostRequest()
+                    // {
+                    //     OrganizationDescription = state.OrganizationDescription,
+                    //     OrganizationName = state.OrganizationName
+                    // }, details.EnterpriseAPIKey, state.Host);
 
-                // state.Host = host?.ToLower();
+                    // state.HostApprovalMessage = null;
 
-                // var acquired = await entArch.SecureHost(new SecureHostRequest()
-                // {
-                //     OrganizationDescription = state.OrganizationDescription,
-                //     OrganizationName = state.OrganizationName
-                // }, details.EnterpriseAPIKey, state.Host);
+                    // if (acquired.Status)
+                    // {
+                    //     state.Step = StepTypes.Provisioning;
 
-                // state.HostApprovalMessage = null;
-
-                // if (acquired.Status)
-                // {
-                //     state.Step = StepTypes.Provisioning;
-
-                //     state.Provisioning = "Sit back and relax while we provision your new organization forge. This will configure things to run at the above domain.";
-                // }
-                // else
-                //     state.HostApprovalMessage = acquired.Status.Message;
+                    //     state.Provisioning = "Sit back and relax while we provision your new organization forge. This will configure things to run at the above domain.";
+                    // }
+                    // else
+                    //     state.HostApprovalMessage = acquired.Status.Message;
+                }
             }
 
             return state;
