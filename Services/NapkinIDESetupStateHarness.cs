@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Fathym;
+using LCU.Graphs.Registry.Enterprises.Provisioning;
 using LCU.Personas.Client.Applications;
 using LCU.Personas.Client.DevOps;
 using LCU.Personas.Client.Enterprises;
@@ -64,39 +65,37 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                 if (entRes.Status)
                 {
-                    var setup = await devOpsArch.SetupInfrastructure(new SetupInfrastructureRequest()
+                    var doProj = await devOpsArch.EnsureDevOpsProject(entRes.Model.PrimaryAPIKey, details.Username, details.EnterpriseAPIKey);
+
+                    var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
                     {
                         EnvSettings = state.EnvSettings,
                         OrganizationLookup = state.OrganizationLookup
-                    }, details.EnterpriseAPIKey, details.Username);
+                    }, entRes.Model.PrimaryAPIKey);
 
-                    // if (configured.Status)
-                    // {
-                    //     state.Environment = configured.Model;
+                    var env = envResp.Model;
 
-                    //     var envSettings = await entMgr.GetEnvironmentSettings(details.EnterpriseAPIKey, state.Environment.Lookup);
+                    var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(entRes.Model.PrimaryAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
 
-                    //     state.EnvSettings = envSettings.Model;
-                    // }
-                    // else
-                    //     state.Error = configured.Status.Message;
+                    var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
+                    {
+                        EnvironmentLookup = env.Lookup
+                    }, entRes.Model.PrimaryAPIKey, details.Username, details.EnterpriseAPIKey);
 
-                    // if (state.InfraTemplate.SelectedTemplate.IsNullOrEmpty())
-                    //     state.InfraTemplate.SelectedTemplate = selectedTemplate;
+                    var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(entRes.Model.PrimaryAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
 
-                    // var committed = await devOpsArch.CommitInfrastructure(new Presentation.Personas.DevOps.CommitInfrastructureRequest()
-                    // {
-                    //     EnvironmentLookup = state.Environment.Lookup,
-                    //     SelectedTemplate = state.InfraTemplate.SelectedTemplate,
-                    // }, details.EnterpriseAPIKey, state.Environment.Lookup, details.Username);
+                    var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(entRes.Model.PrimaryAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
+                        doProj.Model);
 
-                    // state.Host = host?.ToLower();
+                    var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest() 
+                    {
+                        Template = "fathym\\daf-setup"
+                    }, entRes.Model.PrimaryAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
 
-                    // var acquired = await entArch.SecureHost(new SecureHostRequest()
-                    // {
-                    //     OrganizationDescription = state.OrganizationDescription,
-                    //     OrganizationName = state.OrganizationName
-                    // }, details.EnterpriseAPIKey, state.Host);
+                    var acquired = await entArch.EnsureHost(new EnsureHostRequest()
+                    {
+                        EnviromentLookup = env.Lookup
+                    }, entRes.Model.PrimaryAPIKey, state.Host, env.Lookup, details.EnterpriseAPIKey);
 
                     // state.HostApprovalMessage = null;
 
@@ -150,7 +149,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         {
             logger.LogInformation("Securing Host");
 
-            state.Host = host;
+            state.Host = host?.ToLower();
 
             await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Review);
 
