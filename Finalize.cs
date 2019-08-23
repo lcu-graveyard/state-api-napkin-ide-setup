@@ -26,9 +26,9 @@ namespace LCU.State.API.NapkinIDE.Setup
             [HttpTrigger(AuthorizationLevel.Admin, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-			return await req.Manage<SecureHostRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
+			return await req.Manage<FinalizeRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
-                return await mgr.SecureHost(reqData.Host);
+                return await mgr.Finalize();
             });
         }
     }
