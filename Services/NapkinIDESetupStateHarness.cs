@@ -96,10 +96,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                         Template = "fathym\\daf-setup"
                     }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
 
-                    if (envInfra.Status)
-                    {
-                        await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Verify);
-                    }
+                    state.EnterpriseBooted = envInfra.Status;
                 }
             }
 

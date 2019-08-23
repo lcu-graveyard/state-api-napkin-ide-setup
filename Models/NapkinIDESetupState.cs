@@ -11,16 +11,16 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
     public class NapkinIDESetupState
     {
         [DataMember]
-        public string DevOpsAppID { get; set; }
+        public virtual string DevOpsAppID { get; set; }
 
         [DataMember]
-        public string DevOpsClientSecret { get; set; }
+        public virtual string DevOpsClientSecret { get; set; }
 
         [DataMember]
-        public string DevOpsScopes { get; set; }
+        public virtual string DevOpsScopes { get; set; }
 
         [DataMember]
-        public virtual string NewEnterpriseAPIKey { get; set; }
+        public virtual bool EnterpriseBooted { get; set; }
 
         [DataMember]
         public virtual string EnvironmentLookup { get; set; }
@@ -43,6 +43,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
 
         [DataMember]
         public virtual bool Loading { get; set; }
+
+        [DataMember]
+        public virtual string NewEnterpriseAPIKey { get; set; }
 
         [DataMember]
         public virtual string OrganizationDescription { get; set; }
@@ -82,12 +85,6 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
 
         [EnumMember]
         Review,
-
-        [EnumMember]
-        Verify,
-
-        // [EnumMember]
-        // Provisioning,
 
         [EnumMember]
         Complete
