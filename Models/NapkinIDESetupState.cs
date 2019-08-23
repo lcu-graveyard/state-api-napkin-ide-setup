@@ -20,6 +20,12 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         public string DevOpsScopes { get; set; }
 
         [DataMember]
+        public virtual string NewEnterpriseAPIKey { get; set; }
+
+        [DataMember]
+        public virtual string EnvironmentLookup { get; set; }
+
+        [DataMember]
         public virtual MetadataModel EnvSettings { get; set; }
         
 		[DataMember]
@@ -42,10 +48,10 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         public virtual string OrganizationDescription { get; set; }
 
         [DataMember]
-        public virtual string OrganizationName { get; set; }
+        public virtual string OrganizationLookup { get; set; }
 
         [DataMember]
-        public virtual string OrganizationLookup { get; set; }
+        public virtual string OrganizationName { get; set; }
 
         [DataMember]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -71,9 +77,6 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         [EnumMember]
         AzureSetup,
 
-        // [EnumMember]
-        // AzureOAuth,
-
         [EnumMember]
         HostConfig,
 
@@ -81,7 +84,10 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         Review,
 
         [EnumMember]
-        Provisioning,
+        Verify,
+
+        // [EnumMember]
+        // Provisioning,
 
         [EnumMember]
         Complete

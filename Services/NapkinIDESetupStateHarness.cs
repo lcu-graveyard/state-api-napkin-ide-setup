@@ -65,48 +65,41 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                 if (entRes.Status)
                 {
-                    var doProj = await devOpsArch.EnsureDevOpsProject(entRes.Model.PrimaryAPIKey, details.Username, details.EnterpriseAPIKey);
+                    state.NewEnterpriseAPIKey = entRes.Model.PrimaryAPIKey;
+                    
+                    var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
 
                     var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
                     {
                         EnvSettings = state.EnvSettings,
                         OrganizationLookup = state.OrganizationLookup
-                    }, entRes.Model.PrimaryAPIKey);
+                    }, state.NewEnterpriseAPIKey);
 
                     var env = envResp.Model;
 
-                    var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(entRes.Model.PrimaryAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+                    state.EnvironmentLookup = env.Lookup;
+
+                    var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
 
                     var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
                     {
                         EnvironmentLookup = env.Lookup
-                    }, entRes.Model.PrimaryAPIKey, details.Username, details.EnterpriseAPIKey);
+                    }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
 
-                    var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(entRes.Model.PrimaryAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+                    var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
 
-                    var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(entRes.Model.PrimaryAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
+                    var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
                         doProj.Model);
 
-                    var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest() 
+                    var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
                     {
                         Template = "fathym\\daf-setup"
-                    }, entRes.Model.PrimaryAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
+                    }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
 
-                    var acquired = await entArch.EnsureHost(new EnsureHostRequest()
+                    if (envInfra.Status)
                     {
-                        EnviromentLookup = env.Lookup
-                    }, entRes.Model.PrimaryAPIKey, state.Host, env.Lookup, details.EnterpriseAPIKey);
-
-                    // state.HostApprovalMessage = null;
-
-                    // if (acquired.Status)
-                    // {
-                    //     state.Step = StepTypes.Provisioning;
-
-                    //     state.Provisioning = "Sit back and relax while we provision your new organization forge. This will configure things to run at the above domain.";
-                    // }
-                    // else
-                    //     state.HostApprovalMessage = acquired.Status.Message;
+                        await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Verify);
+                    }
                 }
             }
 
@@ -120,6 +113,28 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             state.EnvSettings = settings;
 
             await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.HostConfig);
+
+            return state;
+        }
+
+        public virtual async Task<NapkinIDESetupState> Finalize()
+        {
+            await HasDevOpsOAuth();
+
+            if (state.HasDevOpsOAuth)
+            {
+                var ensured = await entArch.EnsureHost(new EnsureHostRequest()
+                {
+                    EnviromentLookup = state.EnvironmentLookup
+                }, state.NewEnterpriseAPIKey, state.Host, state.EnvironmentLookup, details.EnterpriseAPIKey);
+
+                //  TODO:  Release LCU Runtime and Web Job to the Web App via a persona - webApp.WarDeploy i think, or one of the other deploy methods
+
+                if (ensured.Status)
+                {
+                    // await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Complete);
+                }
+            }
 
             return state;
         }
