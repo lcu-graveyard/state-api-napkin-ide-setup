@@ -66,7 +66,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 if (entRes.Status)
                 {
                     state.NewEnterpriseAPIKey = entRes.Model.PrimaryAPIKey;
-                    
+
                     var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
 
                     var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
@@ -91,9 +91,12 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                     var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
                         doProj.Model);
 
+                    //  Sleep to ensure build triggers are ready
+                    await Task.Delay(5000);
+
                     var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
                     {
-                        Template = "fathym\\daf-setup"
+                        Template = "fathym\\daf-state-setup"
                     }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
 
                     state.EnterpriseBooted = envInfra.Status;
@@ -120,16 +123,25 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             if (state.HasDevOpsOAuth)
             {
-                var ensured = await entArch.EnsureHost(new EnsureHostRequest()
+                var authAppEnsured = await entArch.EnsureHostAuthApp(state.NewEnterpriseAPIKey, state.Host, state.EnvironmentLookup);
+
+                var hostEnsured = await entArch.EnsureHost(new EnsureHostRequest()
                 {
                     EnviromentLookup = state.EnvironmentLookup
                 }, state.NewEnterpriseAPIKey, state.Host, state.EnvironmentLookup, details.EnterpriseAPIKey);
 
+                var runtimeEnsured = await entArch.EnsureLCURuntime(state.NewEnterpriseAPIKey, state.EnvironmentLookup);
+
+                // var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
+                // {
+                //     Hosts = new List<string>() { state.Host }
+                // }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.EnterpriseAPIKey);
+
                 //  TODO:  Release LCU Runtime and Web Job to the Web App via a persona - webApp.WarDeploy i think, or one of the other deploy methods
 
-                if (ensured.Status)
+                // if (sslEnsured.Status)
                 {
-                    // await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Complete);
+                    // state.Provisioning = true;
                 }
             }
 
