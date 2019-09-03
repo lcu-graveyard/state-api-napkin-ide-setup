@@ -137,7 +137,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                     Hosts = new List<string>() { state.Host }
                 }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.EnterpriseAPIKey);
 
-                //  TODO:  Release LCU Runtime and Web Job to the Web App via a persona - webApp.WarDeploy i think, or one of the other deploy methods
+                //  TODO:  Create App Seed
 
                 // if (sslEnsured.Status)
                 {
