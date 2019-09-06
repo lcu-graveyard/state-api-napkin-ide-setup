@@ -159,7 +159,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                             {
                                 //  TODO:  Create App Seed
 
-                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.Host);
+                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, state.Host);
 
                                 if (nideConfigured.Status)
                                     state.Step = NapkinIDESetupStepTypes.Complete;
