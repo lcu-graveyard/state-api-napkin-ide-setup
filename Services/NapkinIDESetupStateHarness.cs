@@ -69,37 +69,49 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                     var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
 
-                    var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
+                    if (doProj.Status)
                     {
-                        EnvSettings = state.EnvSettings,
-                        OrganizationLookup = state.OrganizationLookup
-                    }, state.NewEnterpriseAPIKey);
+                        var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
+                        {
+                            EnvSettings = state.EnvSettings,
+                            OrganizationLookup = state.OrganizationLookup
+                        }, state.NewEnterpriseAPIKey);
 
-                    var env = envResp.Model;
+                        if (envResp.Status)
+                        {
+                            var env = envResp.Model;
 
-                    state.EnvironmentLookup = env.Lookup;
+                            state.EnvironmentLookup = env.Lookup;
 
-                    var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+                            var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
 
-                    var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
-                    {
-                        EnvironmentLookup = env.Lookup
-                    }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
+                            var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
+                            {
+                                EnvironmentLookup = env.Lookup
+                            }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
 
-                    var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+                            if (lcuFeedResp.Status)
+                            {
+                                var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
 
-                    var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
-                        doProj.Model);
+                                if (taskLibraryResp.Status)
+                                {
+                                    var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
+                                        doProj.Model);
 
-                    //  Sleep to ensure build triggers are ready
-                    await Task.Delay(5000);
+                                    if (buildReleaseResp.Status)
+                                    {
+                                        var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
+                                        {
+                                            Template = "fathym\\daf-state-setup"
+                                        }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
 
-                    var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
-                    {
-                        Template = "fathym\\daf-state-setup"
-                    }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
-
-                    state.EnterpriseBooted = envInfra.Status;
+                                        state.EnterpriseBooted = envInfra.Status;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -125,23 +137,35 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             {
                 var authAppEnsured = await entArch.EnsureHostAuthApp(state.NewEnterpriseAPIKey, state.Host, state.EnvironmentLookup);
 
-                var hostEnsured = await entArch.EnsureHost(new EnsureHostRequest()
+                if (authAppEnsured.Status)
                 {
-                    EnviromentLookup = state.EnvironmentLookup
-                }, state.NewEnterpriseAPIKey, state.Host, state.EnvironmentLookup, details.EnterpriseAPIKey);
+                    var hostEnsured = await entArch.EnsureHost(new EnsureHostRequest()
+                    {
+                        EnviromentLookup = state.EnvironmentLookup
+                    }, state.NewEnterpriseAPIKey, state.Host, state.EnvironmentLookup, details.EnterpriseAPIKey);
 
-                var runtimeEnsured = await entArch.EnsureLCURuntime(state.NewEnterpriseAPIKey, state.EnvironmentLookup);
+                    if (hostEnsured.Status)
+                    {
+                        var runtimeEnsured = await entArch.EnsureLCURuntime(state.NewEnterpriseAPIKey, state.EnvironmentLookup);
 
-                var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
-                {
-                    Hosts = new List<string>() { state.Host }
-                }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.EnterpriseAPIKey);
+                        if (runtimeEnsured.Status)
+                        {
+                            var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
+                            {
+                                Hosts = new List<string>() { state.Host }
+                            }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.EnterpriseAPIKey);
 
-                //  TODO:  Create App Seed
+                            if (sslEnsured.Status)
+                            {
+                                //  TODO:  Create App Seed
 
-                // if (sslEnsured.Status)
-                {
-                    // state.Provisioning = true;
+                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.Host);
+
+                                if (nideConfigured.Status)
+                                    state.Step = NapkinIDESetupStepTypes.Complete;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -184,7 +208,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         {
             logger.LogInformation("Setting host flow");
 
-            if (state.HostOptions == null || state.HostOptions.Count == 0)
+            if (state.HostOptions.IsNullOrEmpty())
             {
                 var regHosts = await entMgr.ListRegistrationHosts(details.EnterpriseAPIKey);
 
