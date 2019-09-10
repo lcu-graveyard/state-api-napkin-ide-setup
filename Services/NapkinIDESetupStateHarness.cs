@@ -161,8 +161,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                                 var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, state.Host);
 
-                                // if (nideConfigured.Status)
-                                //     state.Step = NapkinIDESetupStepTypes.Complete;
+                                if (nideConfigured.Status)
+                                    state.Step = NapkinIDESetupStepTypes.Complete;
                             }
                         }
                     }
