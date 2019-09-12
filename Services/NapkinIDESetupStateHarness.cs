@@ -50,6 +50,19 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         #endregion
 
         #region API Methods
+        public virtual async Task<NapkinIDESetupState> AcceptTerms(DateTimeOffset acceptedOn, string termsVersion)
+        {
+            logger.LogInformation("Accepting Terms");
+
+            //  TODO:  Write and call persona to accept terms
+
+            state.TermsAccepted = Status.Success;
+
+            await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Review);
+
+            return state;
+        }
+
         public virtual async Task<NapkinIDESetupState> BootEnterprise()
         {
             await HasDevOpsOAuth();
@@ -126,6 +139,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.HostConfig);
 
+            await SetHostFlow(HostFlowTypes.shared);
+
             return state;
         }
 
@@ -157,17 +172,30 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (sslEnsured.Status)
                             {
-                                //  TODO:  Create App Seed
-
                                 var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, state.Host);
 
                                 if (nideConfigured.Status)
+                                {
                                     state.Step = NapkinIDESetupStepTypes.Complete;
+
+                                    //  TODO:  Create App Seed
+                                }
                             }
                         }
                     }
                 }
             }
+
+            return state;
+        }
+
+        public virtual async Task<NapkinIDESetupState> GetTerms()
+        {
+            logger.LogInformation("Getting Terms");
+
+            //  TODO:  Write and call persona to get terms
+
+            state.Terms = "The full terms are coming soon";
 
             return state;
         }
@@ -199,12 +227,14 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             state.Host = host?.ToLower();
 
-            await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Review);
+            await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.Terms);
+
+            await GetTerms();
 
             return state;
         }
 
-        public virtual async Task<NapkinIDESetupState> SetHostFlow(string hostFlow)
+        public virtual async Task<NapkinIDESetupState> SetHostFlow(HostFlowTypes hostFlow)
         {
             logger.LogInformation("Setting host flow");
 
@@ -215,7 +245,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 state.HostOptions = regHosts.Model;
             }
 
-            state.HostFlow = hostFlow?.ToEnum<HostFlowTypes>();
+            state.HostFlow = hostFlow;
 
             return state;
         }

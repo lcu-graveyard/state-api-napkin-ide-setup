@@ -59,6 +59,15 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         [DataMember]
         [JsonConverter(typeof(StringEnumConverter))]
         public virtual NapkinIDESetupStepTypes Step { get; set; }
+
+        [DataMember]
+        public virtual string Subdomain { get; set; }
+
+        [DataMember]
+        public virtual string Terms { get; set; }
+
+        [DataMember]
+        public virtual bool TermsAccepted { get; set; }
     }
 
 	[DataContract]
@@ -82,6 +91,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
 
         [EnumMember]
         HostConfig,
+
+        [EnumMember]
+        Terms,
 
         [EnumMember]
         Review,
