@@ -5,7 +5,7 @@
     <RootNamespace>state_api_napkin_ide_setup</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LCU.StateAPI" Version="1.33.19249.2" />
+    <PackageReference Include="LCU.StateAPI" Version="1.35.19255.2" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
