@@ -131,6 +131,17 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             return state;
         }
 
+        public virtual async Task<NapkinIDESetupState> CanFinalize()
+        {
+            var envLookup = $"{state.OrganizationLookup}-prd";
+
+            var canFinalize = await entMgr.EnsureInfraBuildAndRelease(details.EnterpriseAPIKey, details.Username, envLookup);
+
+            state.CanFinalize = canFinalize.Status == Status.Success;
+
+            return state;
+        }
+
         public virtual async Task<NapkinIDESetupState> ConfigureInfrastructure(string infraType, bool useDefaultSettings, MetadataModel settings)
         {
             var envLookup = $"{state.OrganizationLookup}-prd";

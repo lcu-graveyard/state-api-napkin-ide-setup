@@ -11,6 +11,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
     public class NapkinIDESetupState
     {
         [DataMember]
+        public virtual bool CanFinalize { get; set; }
+
+        [DataMember]
         public virtual string DevOpsAppID { get; set; }
 
         [DataMember]
