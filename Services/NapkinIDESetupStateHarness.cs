@@ -20,8 +20,6 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
     public class NapkinIDESetupStateHarness : LCUStateHarness<NapkinIDESetupState>
     {
         #region Fields
-        protected readonly ApplicationManagerClient appMgr;
-
         protected readonly DevOpsArchitectClient devOpsArch;
 
         protected readonly EnterpriseArchitectClient entArch;
@@ -172,7 +170,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (sslEnsured.Status)
                             {
-                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, state.Host);
+                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
 
                                 if (nideConfigured.Status)
                                 {
