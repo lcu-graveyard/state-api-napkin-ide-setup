@@ -133,11 +133,14 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> CanFinalize()
         {
-            var envLookup = $"{state.OrganizationLookup}-prd";
+            state.CanFinalize = false;
 
-            var canFinalize = await entMgr.EnsureInfraBuildAndRelease(details.EnterpriseAPIKey, details.Username, envLookup);
+            if (!state.NewEnterpriseAPIKey.IsNullOrEmpty() && !state.EnvironmentLookup.IsNullOrEmpty())
+            {
+                var canFinalize = await entMgr.EnsureInfraBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, state.EnvironmentLookup, details.EnterpriseAPIKey);
 
-            state.CanFinalize = canFinalize.Status == Status.Success;
+                state.CanFinalize = canFinalize.Status == Status.Success;
+            }
 
             return state;
         }
@@ -183,7 +186,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (sslEnsured.Status)
                             {
-                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.EnvironmentLookup, state.Host);
+                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
 
                                 if (nideConfigured.Status)
                                 {
