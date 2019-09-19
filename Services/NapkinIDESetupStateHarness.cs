@@ -129,6 +129,20 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             return state;
         }
 
+        public virtual async Task<NapkinIDESetupState> CanFinalize()
+        {
+            state.CanFinalize = false;
+
+            if (!state.NewEnterpriseAPIKey.IsNullOrEmpty() && !state.EnvironmentLookup.IsNullOrEmpty())
+            {
+                var canFinalize = await entMgr.EnsureInfraBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, state.EnvironmentLookup, details.EnterpriseAPIKey);
+
+                state.CanFinalize = canFinalize.Status == Status.Success;
+            }
+
+            return state;
+        }
+
         public virtual async Task<NapkinIDESetupState> ConfigureInfrastructure(string infraType, bool useDefaultSettings, MetadataModel settings)
         {
             var envLookup = $"{state.OrganizationLookup}-prd";
