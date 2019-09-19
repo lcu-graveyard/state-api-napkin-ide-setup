@@ -187,7 +187,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                                 var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
                                 
                                 //  TODO: Call in parallel
-                                nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
+                                // nideConfigured = await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
 
                                 if (nideConfigured.Status)
                                 {
