@@ -185,6 +185,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                             if (sslEnsured.Status)
                             {
                                 var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
+                                
+                                //  TODO: Call in parallel
+                                nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
 
                                 if (nideConfigured.Status)
                                 {
