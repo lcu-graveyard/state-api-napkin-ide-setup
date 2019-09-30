@@ -180,7 +180,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                             var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
                             {
                                 Hosts = new List<string>() { state.Host }
-                            }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.EnterpriseAPIKey);
+                            }, state.NewEnterpriseAPIKey, state.EnvironmentLookup);
 
                             if (sslEnsured.Status)
                             {
