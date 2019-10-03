@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Fathym;
+using Fathym.API;
 using LCU.Graphs.Registry.Enterprises.Provisioning;
 using LCU.Personas.Client.Applications;
 using LCU.Personas.Client.DevOps;
@@ -67,62 +68,74 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             if (state.HasDevOpsOAuth)
             {
-                var entRes = await entArch.CreateEnterprise(new CreateEnterpriseRequest()
+                if (state.NewEnterpriseAPIKey.IsNullOrEmpty())
                 {
-                    Description = state.OrganizationDescription,
-                    Host = state.Host,
-                    Name = state.OrganizationName
-                }, details.EnterpriseAPIKey, details.Username);
-
-                if (entRes.Status)
-                {
-                    state.NewEnterpriseAPIKey = entRes.Model.PrimaryAPIKey;
-
-                    var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
-
-                    if (doProj.Status)
+                    var entRes = await entArch.CreateEnterprise(new CreateEnterpriseRequest()
                     {
-                        var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
-                        {
-                            EnvSettings = state.EnvSettings,
-                            OrganizationLookup = state.OrganizationLookup
-                        }, state.NewEnterpriseAPIKey);
+                        Description = state.OrganizationDescription,
+                        Host = state.Host,
+                        Name = state.OrganizationName
+                    }, details.EnterpriseAPIKey, details.Username);
 
-                        if (envResp.Status)
-                        {
-                            var env = envResp.Model;
+                    state.NewEnterpriseAPIKey = entRes.Model.PrimaryAPIKey;
+                }
 
-                            state.EnvironmentLookup = env.Lookup;
+                if (!state.NewEnterpriseAPIKey.IsNullOrEmpty())
+                {
+                    var envResp = await devOpsArch.SetupEnvironment(new SetupEnvironmentRequest()
+                    {
+                        EnvSettings = state.EnvSettings,
+                        Template = "fathym\\daf-iot-setup",
+                        OrganizationLookup = state.OrganizationLookup
+                    }, state.NewEnterpriseAPIKey, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey);
 
-                            var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+                    state.EnvironmentLookup = envResp.Model?.Lookup;
 
-                            var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
-                            {
-                                EnvironmentLookup = env.Lookup
-                            }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
+                    state.EnterpriseBooted = envResp.Status;
 
-                            if (lcuFeedResp.Status)
-                            {
-                                var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+                    // var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
 
-                                if (taskLibraryResp.Status)
-                                {
-                                    var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
-                                        doProj.Model);
+                    // if (doProj.Status)
+                    // {
+                    //     var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
+                    //     {
+                    //         EnvSettings = state.EnvSettings,
+                    //         OrganizationLookup = state.OrganizationLookup
+                    //     }, state.NewEnterpriseAPIKey);
 
-                                    if (buildReleaseResp.Status)
-                                    {
-                                        var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
-                                        {
-                                            Template = "fathym\\daf-state-setup"
-                                        }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
+                    //     if (envResp.Status)
+                    //     {
+                    //         var env = envResp.Model;
 
-                                        state.EnterpriseBooted = envInfra.Status;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    //         var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+
+                    //         var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
+                    //         {
+                    //             EnvironmentLookup = env.Lookup
+                    //         }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
+
+                    //         if (lcuFeedResp.Status)
+                    //         {
+                    //             var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
+
+                    //             if (taskLibraryResp.Status)
+                    //             {
+                    //                 var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
+                    //                     doProj.Model);
+
+                    //                 if (buildReleaseResp.Status)
+                    //                 {
+                    //                     var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
+                    //                     {
+                    //                         Template = "fathym\\daf-state-setup"
+                    //                     }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
+
+                    //                     state.EnterpriseBooted = envInfra.Status;
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
                 }
             }
 
@@ -135,7 +148,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             if (!state.NewEnterpriseAPIKey.IsNullOrEmpty() && !state.EnvironmentLookup.IsNullOrEmpty())
             {
-                var canFinalize = await entMgr.EnsureInfraBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, state.EnvironmentLookup, details.EnterpriseAPIKey);
+                var canFinalize = await entMgr.EnsureInfraBuiltAndReleased(state.NewEnterpriseAPIKey, details.Username, state.EnvironmentLookup, details.EnterpriseAPIKey);
 
                 state.CanFinalize = canFinalize.Status == Status.Success;
             }
@@ -184,8 +197,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (sslEnsured.Status)
                             {
+                                //  TODO: Move to configured call via lowcodeunits in @lowcodeunit/infrastructure
                                 var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
-                                
+
                                 if (nideConfigured.Status)
                                     //  TODO: Call in parallel
                                     nideConfigured = await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
