@@ -186,16 +186,16 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                     if (hostEnsured.Status)
                     {
-                        var runtimeEnsured = await entArch.EnsureLCURuntime(state.NewEnterpriseAPIKey, state.EnvironmentLookup);
-
-                        if (runtimeEnsured.Status)
+                        var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
                         {
-                            var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
-                            {
-                                Hosts = new List<string>() { state.Host }
-                            }, state.NewEnterpriseAPIKey, state.EnvironmentLookup);
+                            Hosts = new List<string>() { state.Host }
+                        }, state.NewEnterpriseAPIKey, state.EnvironmentLookup);
 
-                            if (sslEnsured.Status)
+                        if (sslEnsured.Status)
+                        {
+                            var runtimeEnsured = await entArch.EnsureLCURuntime(state.NewEnterpriseAPIKey, state.EnvironmentLookup);
+
+                            if (runtimeEnsured.Status)
                             {
                                 //  TODO: Move to configured call via lowcodeunits in @lowcodeunit/infrastructure
                                 var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
