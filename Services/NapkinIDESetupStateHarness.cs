@@ -225,7 +225,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             //  TODO:  Write and call persona to get terms
 
-            state.Terms = "The full terms are coming soon";
+            state.Terms = "By clicking this button you accept Fathym's terms and conditions";
 
             return state;
         }
