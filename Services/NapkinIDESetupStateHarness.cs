@@ -225,7 +225,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             //  TODO:  Write and call persona to get terms
 
-            state.Terms = "<p>By continuting through this step and accepting, you agree to enter into and be bound by the Enterprise Agreement located at:</p>  <a target='blank' href='https://fathym.com/enterprise-agreement/'>https://fathym.com/enterprise-agreement/</a>";
+            state.Terms = "<p>By continuting through this step and accepting, you agree to enter into and be bound by the Enterprise Agreement located at:</p>  <a target='blank' href='https://fathym.com/enterprise-agreement/'>https://fathym.com/enterprise-agreement/</a> <br /> <p>By clicking Accept you also accept Fathym's Terms and Conditions: </p> <a target='blank' href='https://fathym.com/terms-of-services/'>https://fathym.com/terms-of-services/</a>";
 
             return state;
         }
