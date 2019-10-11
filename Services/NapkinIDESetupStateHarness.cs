@@ -189,7 +189,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                         var sslEnsured = await entArch.EnsureHostsSSL(new EnsureHostsSSLRequest()
                         {
                             Hosts = new List<string>() { state.Host }
-                        }, state.NewEnterpriseAPIKey, state.EnvironmentLookup);
+                        }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, parentEntApiKey: details.EnterpriseAPIKey);
 
                         if (sslEnsured.Status)
                         {
@@ -198,18 +198,16 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                             if (runtimeEnsured.Status)
                             {
                                 //  TODO: Move to configured call via lowcodeunits in @lowcodeunit/infrastructure
-                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
+                                // var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
 
-                                if (nideConfigured.Status)
-                                    //  TODO: Call in parallel
-                                    nideConfigured = await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
+                                // if (nideConfigured.Status)
+                                //     //  TODO: Call in parallel
+                                //     nideConfigured = await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
 
-                                if (nideConfigured.Status)
-                                {
-                                    state.Step = NapkinIDESetupStepTypes.Complete;
-
-                                    //  TODO:  Create App Seed
-                                }
+                                // if (nideConfigured.Status)
+                                // {
+                                state.Step = NapkinIDESetupStepTypes.Complete;
+                                // }
                             }
                         }
                     }
@@ -225,7 +223,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             //  TODO:  Write and call persona to get terms
 
-            state.Terms = "<p>By continuting through this step and accepting, you agree to enter into and be bound by the Enterprise Agreement located at:</p>  <a target='blank' href='https://fathym.com/enterprise-agreement/'>https://fathym.com/enterprise-agreement/</a> <br /> <p>By clicking Accept you also accept Fathym's Terms and Conditions: </p> <a target='blank' href='https://fathym.com/terms-of-services/'>https://fathym.com/terms-of-services/</a>";
+            state.Terms = @"<div *ngIf=""State.Step === SetupStepTypes['Terms']"">  <h1 fxLayoutAlign=""center center"" class=""mat-display-1 title margin-bottom-4"">    Fathym Enterprise Agreement  </h1>  <div fxLayout=""row"" fxLayoutAlign=""space-around start""  fxLayoutGap=""50px"">    <div fxFlex=""50%"">  <p>By continuting through this step and accepting, you agree to enter into and be bound by the Enterprise Agreement located at:</p>    <a target='blank' href='https://fathym.com/enterprise-agreement/'>    <button       mat-button       class=""mat-full-width""        color=""warn"" >      Enterprise Agreement    </button>  </a>   </div>  <br />   <div fxFlex=""50%"">  <p>By clicking Accept you also accept Fathym's Terms and Conditions: </p>   <a target='blank' href='https://fathym.com/terms-of-services/'>    <button       mat-button       class=""mat-full-width""       color=""warn"" >      Terms & Conditions    </button>  </a>  </div>  </div>  <!-- <div [innerHTML]=""State.Terms"" style=""margin-bottom: 1.5em""></div> -->  <button mat-raised-button color=""accent"" class=""mat-full-width"" (click)=""AcceptTerms()"" style=""margin-top: 2em;"">    Accept  </button></div>";
 
             return state;
         }
