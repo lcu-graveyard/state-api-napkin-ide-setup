@@ -225,7 +225,40 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
             //  TODO:  Write and call persona to get terms
 
-            state.Terms = "By clicking this button you accept Fathym's terms and conditions";
+            state.Terms = "<div _ngcontent-trf-c16=\"\" class=\"ng-star-inserted\">" +
+                "<h1 _ngcontent-trf-c16=\"\" class=\"mat-display-1 title margin-bottom-4\" fxlayoutalign=\"center center\"" +
+                "ng-reflect-fx-layout-align=\"center center\"" +
+                "style=\"place-content: center; align-items: center; flex-direction: row; box-sizing: border-box; display: flex;\">" +
+                "Fathym Enterprise Agreement </h1>" + 
+                "<div _ngcontent-trf-c16=\"\" fxlayout=\"row\" fxlayoutalign=\"space-around start\" fxlayoutgap=\"50px\"" +
+                "ng-reflect-fx-layout=\"row\" ng-reflect-fx-layout-gap=\"50px\" ng-reflect-fx-layout-align=\"space-around start\"" +
+                "style=\"flex-direction: row; box-sizing: border-box; display: flex; place-content: flex-start space-around; align-items: flex-start;\">" +
+                "<div _ngcontent-trf-c16=\"\" fxflex=\"50%\" ng-reflect-fx-flex=\"50%\"" +
+                "style=\"margin-right: 50px; flex: 1 1 100%; box-sizing: border-box; max-width: 50%;\">" + 
+                "<p _ngcontent-trf-c16=\"\">By continuting through this step and accepting, you agree to enter into and be " +
+                "bound by the Enterprise Agreement located at:</p><a _ngcontent-trf-c16=\"\"" +
+                "href=\"https://fathym.com/enterprise-agreement/\" target=\"blank\"><button _ngcontent-trf-c16=\"\"" +
+                "class=\"mat-full-width mat-button mat-button-base mat-warn\" color=\"warn\" mat-button=\"\"" +
+                "ng-reflect-color=\"warn\"><span class=\"mat-button-wrapper\"> Enterprise Agreement </span>" +
+                "<div class=\"mat-button-ripple mat-ripple\" matripple=\"\" ng-reflect-centered=\"false\"" +
+                "ng-reflect-disabled=\"false\" ng-reflect-trigger=\"[object HTMLButtonElement]\"></div>" +
+                "<div class=\"mat-button-focus-overlay\"></div>" +
+                "</button></a>" +
+                "</div><br _ngcontent-trf-c16=\"\" style=\"margin-right: 50px;\">" +
+                "<div _ngcontent-trf-c16=\"\" fxflex=\"50%\" ng-reflect-fx-flex=\"50%\"" +
+                "style=\"flex: 1 1 100%; box-sizing: border-box; max-width: 50%;\">" +
+                "<p _ngcontent-trf-c16=\"\">By clicking Accept you also accept Fathym's Terms and Conditions: </p><a " +
+                "_ngcontent-trf-c16=\"\" href=\"https://fathym.com/terms-of-services/\" target=\"blank\"><button " +
+                "_ngcontent-trf-c16=\"\" class=\"mat-full-width mat-button mat-button-base mat-warn\" color=\"warn\"" +
+                "mat-button=\"\" ng-reflect-color=\"warn\"><span class=\"mat-button-wrapper\"> Terms &amp; Conditions" +
+                "</span>" +
+                "<div class=\"mat-button-ripple mat-ripple\" matripple=\"\" ng-reflect-centered=\"false\"" +
+                "ng-reflect-disabled=\"false\" ng-reflect-trigger=\"[object HTMLButtonElement]\"></div>" +
+                "<div class=\"mat-button-focus-overlay\"></div>" +
+                "</button></a>" +
+                "</div>" +
+                "</div>" +
+                "</div>";
 
             return state;
         }
