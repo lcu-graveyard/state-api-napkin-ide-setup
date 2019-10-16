@@ -197,19 +197,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (runtimeEnsured.Status)
                             {
-                                //  TODO: Move to configured call via lowcodeunits in @lowcodeunit/infrastructure
-                                var nideConfigured = await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
-
-                                if (nideConfigured.Status)
-                                    //  TODO: Call in parallel
-                                    nideConfigured = await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
-
-                                if (nideConfigured.Status)
-                                {
-                                    state.Step = NapkinIDESetupStepTypes.Complete;
-
-                                    //  TODO:  Create App Seed
-                                }
+                                state.Step = NapkinIDESetupStepTypes.Complete;
                             }
                         }
                     }
@@ -229,12 +217,12 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 "<h1 _ngcontent-trf-c16=\"\" class=\"mat-display-1 title margin-bottom-4\" fxlayoutalign=\"center center\"" +
                 "ng-reflect-fx-layout-align=\"center center\"" +
                 "style=\"place-content: center; align-items: center; flex-direction: row; box-sizing: border-box; display: flex;\">" +
-                "Fathym Enterprise Agreement </h1>" + 
+                "Fathym Enterprise Agreement </h1>" +
                 "<div _ngcontent-trf-c16=\"\" fxlayout=\"row\" fxlayoutalign=\"space-around start\" fxlayoutgap=\"50px\"" +
                 "ng-reflect-fx-layout=\"row\" ng-reflect-fx-layout-gap=\"50px\" ng-reflect-fx-layout-align=\"space-around start\"" +
                 "style=\"flex-direction: row; box-sizing: border-box; display: flex; place-content: flex-start space-around; align-items: flex-start;\">" +
                 "<div _ngcontent-trf-c16=\"\" fxflex=\"50%\" ng-reflect-fx-flex=\"50%\"" +
-                "style=\"margin-right: 50px; flex: 1 1 100%; box-sizing: border-box; max-width: 50%;\">" + 
+                "style=\"margin-right: 50px; flex: 1 1 100%; box-sizing: border-box; max-width: 50%;\">" +
                 "<p _ngcontent-trf-c16=\"\">By continuting through this step and accepting, you agree to enter into and be " +
                 "bound by the Enterprise Agreement located at:</p><a _ngcontent-trf-c16=\"\"" +
                 "href=\"https://fathym.com/enterprise-agreement/\" target=\"blank\"><button _ngcontent-trf-c16=\"\"" +
@@ -258,7 +246,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 "</button></a>" +
                 "</div>" +
                 "</div>" +
-                "</div>"; 
+                "</div>";
 
             return state;
         }
