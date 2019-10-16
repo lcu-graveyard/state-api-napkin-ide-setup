@@ -258,7 +258,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 "</button></a>" +
                 "</div>" +
                 "</div>" +
-                "</div>";
+                "</div>"; 
 
             return state;
         }
