@@ -30,6 +30,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<SecureHostRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Securing Host: {reqData.Host}");
+
                 return await mgr.SecureHost(reqData.Host);
             });
         }

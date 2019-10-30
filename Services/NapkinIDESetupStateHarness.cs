@@ -64,6 +64,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> BootEnterprise()
         {
+            logger.LogInformation("Booting Enterprise");
+
             await HasDevOpsOAuth();
 
             if (state.HasDevOpsOAuth)
@@ -158,6 +160,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> ConfigureInfrastructure(string infraType, bool useDefaultSettings, MetadataModel settings)
         {
+            logger.LogInformation("Configuring Infrastructure.");
+
             var envLookup = $"{state.OrganizationLookup}-prd";
 
             state.EnvSettings = settings;
@@ -171,6 +175,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> Finalize()
         {
+            logger.LogInformation("Finalizing Napkin IDE Setup");
+
             await HasDevOpsOAuth();
 
             if (state.HasDevOpsOAuth)
@@ -321,6 +327,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> SetNapkinIDESetupStep(NapkinIDESetupStepTypes step)
         {
+            logger.LogInformation("Setting Napkin IDE Setup Step");
+
             await HasDevOpsOAuth();
 
             state.Step = step;
@@ -330,6 +338,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
         public virtual async Task<NapkinIDESetupState> SetupDevOpsOAuth(string devOpsAppId, string devOpsClientSecret, string devOpsScopes)
         {
+            logger.LogInformation("Setting Up DevOps OAuth");
+
             await SetNapkinIDESetupStep(NapkinIDESetupStepTypes.HostConfig);
 
             state.DevOpsAppID = devOpsAppId;

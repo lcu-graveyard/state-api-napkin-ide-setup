@@ -30,6 +30,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<SetHostFlowRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Setting Host Flow: {reqData.HostFlow}");
+
                 return await mgr.SetHostFlow(reqData.HostFlow);
             });
         }

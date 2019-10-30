@@ -21,6 +21,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<dynamic, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Can Finalize");
+
                 return await mgr.CanFinalize();
             });
         }

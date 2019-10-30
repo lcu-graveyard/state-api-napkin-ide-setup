@@ -35,6 +35,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
             return await req.Manage<AcceptTermsRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Accepting Terms: {reqData.AcceptedOn} {reqData.Version}");
+
                 return await mgr.AcceptTerms(reqData.AcceptedOn, reqData.Version);
             });
         }

@@ -28,6 +28,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<BootEnterpriseRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Booting Enterprise");
+
                 return await mgr.BootEnterprise();
             });
         }
