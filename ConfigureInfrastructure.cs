@@ -37,6 +37,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<ConfigureInfrastructureRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Configuring Infrastructure: {reqData.InfrastructureType} {reqData.UseDefaultSettings} {reqData.Settings}");
+
                 return await mgr.ConfigureInfrastructure(reqData.InfrastructureType, reqData.UseDefaultSettings, reqData.Settings);
             });
         }

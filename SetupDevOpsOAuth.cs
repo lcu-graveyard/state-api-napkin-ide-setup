@@ -36,6 +36,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<SetupDevOpsOAuthRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Setting DevOps OAuth: {reqData.AppID} {reqData.ClientSecret} {reqData.Scopes}");
+
                 return await mgr.SetupDevOpsOAuth(reqData.AppID, reqData.ClientSecret, reqData.Scopes);
             });
         }

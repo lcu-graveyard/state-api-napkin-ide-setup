@@ -29,6 +29,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
         {
 			return await req.Manage<SetOrganizationDetailsRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Setting Napkin IDE Setup Step: {reqData.Step}");
+
                 return await mgr.SetNapkinIDESetupStep(reqData.Step);
             });
         }

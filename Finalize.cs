@@ -28,6 +28,8 @@ namespace LCU.State.API.NapkinIDE.Setup
         {
 			return await req.Manage<FinalizeRequest, NapkinIDESetupState, NapkinIDESetupStateHarness>(log, async (mgr, reqData) =>
             {
+                log.LogInformation($"Finalizing.");
+                
                 return await mgr.Finalize();
             });
         }
