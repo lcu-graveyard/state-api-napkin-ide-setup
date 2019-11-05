@@ -87,57 +87,14 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                     var envResp = await devOpsArch.SetupEnvironment(new SetupEnvironmentRequest()
                     {
                         EnvSettings = state.EnvSettings,
-                        Template = "fathym\\daf-iot-setup",
+                        Template = "fathym\\daf-state-setup",
+                        // Template = "fathym\\daf-iot-setup",
                         OrganizationLookup = state.OrganizationLookup
                     }, state.NewEnterpriseAPIKey, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey);
 
                     state.EnvironmentLookup = envResp.Model?.Lookup;
 
                     state.EnterpriseBooted = envResp.Status;
-
-                    // var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
-
-                    // if (doProj.Status)
-                    // {
-                    //     var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
-                    //     {
-                    //         EnvSettings = state.EnvSettings,
-                    //         OrganizationLookup = state.OrganizationLookup
-                    //     }, state.NewEnterpriseAPIKey);
-
-                    //     if (envResp.Status)
-                    //     {
-                    //         var env = envResp.Model;
-
-                    //         var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
-
-                    //         var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
-                    //         {
-                    //             EnvironmentLookup = env.Lookup
-                    //         }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
-
-                    //         if (lcuFeedResp.Status)
-                    //         {
-                    //             var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
-
-                    //             if (taskLibraryResp.Status)
-                    //             {
-                    //                 var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
-                    //                     doProj.Model);
-
-                    //                 if (buildReleaseResp.Status)
-                    //                 {
-                    //                     var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
-                    //                     {
-                    //                         Template = "fathym\\daf-state-setup"
-                    //                     }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
-
-                    //                     state.EnterpriseBooted = envInfra.Status;
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                    // }
                 }
             }
 
@@ -203,6 +160,17 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (runtimeEnsured.Status)
                             {
+                                logger.LogInformation("Setting up final steps");
+
+                                var responses = await new[] {
+                                    devOpsArch.SetEnvironmentInfrastructure(new Personas.DevOps.SetEnvironmentInfrastructureRequest()
+                                    {
+                                        Template = "fathym\\daf-iot-setup"
+                                    }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey),
+                                    appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host),
+                                    appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host)
+                                }.WhenAll();
+
                                 state.Step = NapkinIDESetupStepTypes.Complete;
                             }
                         }
