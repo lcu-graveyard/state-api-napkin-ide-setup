@@ -162,14 +162,14 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                             {
                                 logger.LogInformation("Setting up final steps");
 
-                                var responses = await new[] {
-                                    devOpsArch.SetEnvironmentInfrastructure(new Personas.DevOps.SetEnvironmentInfrastructureRequest()
-                                    {
-                                        Template = "fathym\\daf-iot-setup"
-                                    }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey),
-                                    appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host),
-                                    appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host)
-                                }.WhenAll();
+                                await devOpsArch.SetEnvironmentInfrastructure(new Personas.DevOps.SetEnvironmentInfrastructureRequest()
+                                {
+                                    Template = "fathym\\daf-iot-setup"
+                                }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey);
+
+                                await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
+
+                                await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
 
                                 state.Step = NapkinIDESetupStepTypes.Complete;
                             }
