@@ -60,6 +60,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         public virtual string OrganizationName { get; set; }
 
         [DataMember]
+        public virtual string SetupError { get; set; }
+
+        [DataMember]
         [JsonConverter(typeof(StringEnumConverter))]
         public virtual NapkinIDESetupStepTypes Step { get; set; }
 
