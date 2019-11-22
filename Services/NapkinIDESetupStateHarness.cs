@@ -45,6 +45,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             entMgr = req.ResolveClient<EnterpriseManagerClient>(logger);
 
             idMgr = req.ResolveClient<IdentityManagerClient>(logger);
+
+            state.SetupError = "";
         }
         #endregion
 
@@ -91,6 +93,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                         // Template = "fathym\\daf-iot-setup",
                         OrganizationLookup = state.OrganizationLookup
                     }, state.NewEnterpriseAPIKey, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey);
+
+                    if (!envResp.Status)
+                        state.SetupError = envResp.Status.Message;
 
                     state.EnvironmentLookup = envResp.Model?.Lookup;
 
