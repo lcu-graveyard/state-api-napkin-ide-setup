@@ -1,8 +1,9 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using LCU.Graphs.Registry.Enterprises;
+using Fathym;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace LCU.State.API.NapkinIDE.Setup.Models
 {

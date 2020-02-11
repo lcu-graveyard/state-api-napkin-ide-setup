@@ -124,6 +124,31 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             // If successful, adjust state to reflect that a request was sent for this enterprise by this user
             return state;
         }
+
+
+        public virtual async Task<UserManagementState> GrantAccess(string token)
+        {
+            // Unwrap/decrypt token
+
+            // Create access card for user/enterprise ID with default access config type
+
+            // Send email to user that authorization has been granted
+            
+            // Update state property for access
+
+            return state;
+        }
+
+        public virtual async Task<NapkinIDESetupState> DenyAccess(string token)
+        {
+            // Unwrap/decrypt token
+            
+            // Send email to user that authorization has been denied
+
+            // Update state property for access
+            return state;
+        }
+
     }
 
 }
