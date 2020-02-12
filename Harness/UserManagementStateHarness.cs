@@ -72,7 +72,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             var accessRequest = new AccessRequest()
             {
                 User = userID,
-                EnterpriseID = enterpriseID
+                EnterpriseID = enterpriseID,
+                AccessConfigurationType = "LCU"
             };
 
             // Create JToken to attached to metadata model

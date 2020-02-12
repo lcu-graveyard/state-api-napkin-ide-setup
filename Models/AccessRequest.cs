@@ -16,6 +16,14 @@ namespace LCU.State.API.NapkinIDE.Setup.Models
         [DataMember]
         public virtual string EnterpriseID { get; set; }
 
- 
+        [DataMember]
+        public virtual string AccessConfigurationType { get; set; }
+
+        [DataMember]
+        public virtual DateTime ValidStartDate { get; set; }
+
+        [DataMember]
+        public virtual DateTime ValidEndDate { get; set; }
+
     }
 }
