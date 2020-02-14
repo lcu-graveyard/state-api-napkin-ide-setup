@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Http.Internal;
 using System.IO;
 using LCU.Personas.Client.Enterprises;
 using LCU.Personas.Client.Security;
-using LCU.Personas.Identity;
+using LCU.Personas.Security;
 using LCU;
 using Newtonsoft.Json;
 using LCU.Personas.Client.Identity;
@@ -103,7 +103,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                 string emailHtml = $"A user has requested access to this Organization : {grantLink} {denyLink}";
 
                 // Send email from app manager client 
-                foreach (string admin in admins.Result)
+                foreach (string admin in admins.Result.Model)
                 {
                     var email = new AccessRequestEmail()
                     {
@@ -140,7 +140,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             return state;
         }
 
-        public virtual async Task<NapkinIDESetupState> DenyAccess(string token)
+        public virtual async Task<UserManagementState> DenyAccess(string token)
         {
             // Unwrap/decrypt token
             
