@@ -22,9 +22,6 @@ namespace LCU.State.API.UserManagement
         public virtual string UserID { get; set; }
 
         [DataMember]
-        public virtual string EnterpriseKey { get; set; }
-
-        [DataMember]
         public virtual string HostURL { get; set; }
     }
 
@@ -39,7 +36,7 @@ namespace LCU.State.API.UserManagement
             {
                 log.LogInformation($"Requesting user access...");
 
-                await mgr.RequestAuthorization(reqData.UserID, reqData.EnterpriseKey, reqData.HostURL);
+                await mgr.RequestAuthorization(reqData.UserID, reqData.HostURL);
 
                 return await mgr.WhenAll(
                 );

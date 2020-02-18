@@ -34,7 +34,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
         protected readonly ApplicationManagerClient appMgr;
 
-        protected readonly Guid enterpriseId;
+        protected readonly string enterpriseId;
 
         protected readonly EnterpriseManagerClient entMgr;
 
@@ -56,7 +56,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
             var enterprise = entMgr.GetEnterprise(details.EnterpriseAPIKey).GetAwaiter().GetResult();
 
-            enterpriseId = enterprise.Model.ID;
+            enterpriseId = enterprise.Model.ID.ToString();
 
             appMgr.RegisterApplicationProfile(details.ApplicationID, new LCU.ApplicationProfile()
             {
@@ -66,13 +66,13 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             });
         }
 
-        public virtual async Task<UserManagementState> RequestAuthorization(string userID, string enterpriseID, string hostName)
+        public virtual async Task<UserManagementState> RequestAuthorization(string userID, string hostName)
         {
             // Create an access request
             var accessRequest = new AccessRequest()
             {
                 User = userID,
-                EnterpriseID = enterpriseID,
+                EnterpriseID = enterpriseId,
                 AccessConfigurationType = "LCU"
             };
 
@@ -85,7 +85,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             {
                 Payload = model,
                 UserEmail = userID,
-                OrganizationID = enterpriseID,
+                OrganizationID = enterpriseId,
                 Encrypt = true
             };
 
@@ -93,7 +93,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             var response = await secMgr.CreateToken("RequestAccessToken", tokenModel);
 
             // Query graph for admins of enterprise ID
-            var admins = idMgr.ListAdmins(enterpriseID);
+            var admins = idMgr.ListAdmins(enterpriseId);
 
             // Build grant/deny links and text body
             if (response != null)
@@ -112,13 +112,13 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                         EmailTo = admin,
                         User = userID,
                         Subject = "Access authorization requested",
-                        EnterpriseID = enterpriseID
+                        EnterpriseID = enterpriseId
                     };
 
                     var emailModel = new MetadataModel();
                     model.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", JToken.Parse(JsonConvert.SerializeObject(email))));
 
-                    appMgr.SendAccessRequestEmail(model, details.EnterpriseAPIKey);
+                    await appMgr.SendAccessRequestEmail(model, details.EnterpriseAPIKey);
                 }
             }
 
@@ -129,24 +129,15 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
         public virtual async Task<UserManagementState> GrantAccess(string token)
         {
-            // Unwrap/decrypt token
-
-            // Create access card for user/enterprise ID with default access config type
-
-            // Send email to user that authorization has been granted
+            var response = await appMgr.GrantAccess(token, enterpriseId);            
             
-            // Update state property for access
-
             return state;
         }
 
         public virtual async Task<UserManagementState> DenyAccess(string token)
         {
-            // Unwrap/decrypt token
-            
-            // Send email to user that authorization has been denied
+            var response = await appMgr.DenyAccess(token, enterpriseId);
 
-            // Update state property for access
             return state;
         }
 
