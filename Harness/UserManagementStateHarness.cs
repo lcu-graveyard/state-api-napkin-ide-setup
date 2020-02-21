@@ -67,12 +67,12 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             });
         }
 
-        public virtual async Task<UserManagementState> RequestAuthorization(string userID, string hostName)
+        public virtual async Task<UserManagementState> RequestAuthorization()
         {
             // Create an access request
             var accessRequest = new AccessRequest()
             {
-                User = userID,
+                User = details.Username,
                 EnterpriseID = enterpriseId,
                 AccessConfigurationType = "LCU"
             };
@@ -85,7 +85,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             var tokenModel = new CreateTokenModel()
             {
                 Payload = model,
-                UserEmail = userID,
+                UserEmail = details.Username,
                 OrganizationID = enterpriseId,
                 Encrypt = true
             };
@@ -104,8 +104,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             //if ((response != null) && (admins.Result != null))
             if (response != null)
             {
-                string grantLink = $"<a href=\"{hostName}/grant/token?={response.Model}\">Grant Access</a>";
-                string denyLink = $"<a href=\"{hostName}/deny/token?={response.Model}\">Deny Access</a>";
+                string grantLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/grant/token?={response.Model}\">Grant Access</a>";
+                string denyLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/deny/token?={response.Model}\">Deny Access</a>";
                 string emailHtml = $"A user has requested access to this Organization : {grantLink} {denyLink}";                
 
                 // Send email from app manager client 
@@ -117,7 +117,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                         Content = emailHtml,
                         EmailFrom = "admin@fathym.com",
                         EmailTo = admin,
-                        User = userID,
+                        User = details.Username,
                         Subject = "Access authorization requested",
                         EnterpriseID = enterpriseId
                     };

@@ -18,11 +18,6 @@ namespace LCU.State.API.UserManagement
     [DataContract]
     public class RequestUserAccessRequest
     {
-        [DataMember]
-        public virtual string UserID { get; set; }
-
-        [DataMember]
-        public virtual string HostURL { get; set; }
     }
 
     public static class RequestUserAccess
@@ -36,7 +31,7 @@ namespace LCU.State.API.UserManagement
             {
                 log.LogInformation($"Requesting user access...");
 
-                await mgr.RequestAuthorization(reqData.UserID, reqData.HostURL);
+                await mgr.RequestAuthorization();
 
                 return await mgr.WhenAll(
                 );
