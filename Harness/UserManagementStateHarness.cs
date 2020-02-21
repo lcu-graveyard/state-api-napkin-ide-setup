@@ -56,8 +56,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
             var enterprise = entMgr.GetEnterprise(details.EnterpriseAPIKey).GetAwaiter().GetResult();
 
-            enterpriseId = enterprise.Model.ID.ToString();
-
+            //enterpriseId = enterprise.Model.ID.ToString();
+            enterpriseId = details.EnterpriseAPIKey;
+            
             appMgr.RegisterApplicationProfile(details.ApplicationID, new LCU.ApplicationProfile()
             {
                 DatabaseClientMaxPoolConnections = Environment.GetEnvironmentVariable("LCU-DATABASE-CLIENT-MAX-POOL-CONNS").As<int>(32),
@@ -91,19 +92,25 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
             // Encrypt user email and enterpries ID, generate token
             var response = await secMgr.CreateToken("RequestAccessToken", tokenModel);
-
+            
+            response.Model = response.Model ?? String.Empty;
+            
             // Query graph for admins of enterprise ID
             var admins = idMgr.ListAdmins(enterpriseId);
 
+            var tempAdmins = new List<string>(){ "matt.brooks@fathym.com" };
+
             // Build grant/deny links and text body
+            //if ((response != null) && (admins.Result != null))
             if (response != null)
             {
                 string grantLink = $"<a href=\"{hostName}/grant/token?={response.Model}\">Grant Access</a>";
                 string denyLink = $"<a href=\"{hostName}/deny/token?={response.Model}\">Deny Access</a>";
-                string emailHtml = $"A user has requested access to this Organization : {grantLink} {denyLink}";
+                string emailHtml = $"A user has requested access to this Organization : {grantLink} {denyLink}";                
 
                 // Send email from app manager client 
-                foreach (string admin in admins.Result.Model)
+                //foreach (string admin in admins.Result.Model)
+                foreach (string admin in tempAdmins)
                 {
                     var email = new AccessRequestEmail()
                     {
@@ -116,9 +123,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                     };
 
                     var emailModel = new MetadataModel();
-                    model.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", JToken.Parse(JsonConvert.SerializeObject(email))));
-
-                    await appMgr.SendAccessRequestEmail(model, details.EnterpriseAPIKey);
+                    emailModel.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", JToken.Parse(JsonConvert.SerializeObject(email))));
+    
+                    await appMgr.SendAccessRequestEmail(emailModel, details.EnterpriseAPIKey);
                 }
             }
 
