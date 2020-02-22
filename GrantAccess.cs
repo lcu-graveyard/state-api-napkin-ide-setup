@@ -15,13 +15,13 @@ using System.Collections.Generic;
 
 namespace LCU.State.API.NapkinIDE.Setup
 {
-    [DataContract]
-    public class GrantAccessRequest
-    {
-        [DataMember]
-        public virtual string AccessToken { get; set; }
+    // [DataContract]
+    // public class GrantAccessRequest
+    // {
+    //     [DataMember]
+    //     public virtual string AccessToken { get; set; }
 
-    }
+    // }
 
     public static class GrantAccess
     {
@@ -30,11 +30,11 @@ namespace LCU.State.API.NapkinIDE.Setup
             [HttpTrigger(AuthorizationLevel.Admin, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            return await req.Manage<GrantAccessRequest, UserManagementState, UserManagementStateHarness>(log, async (mgr, reqData) =>
+            return await req.Manage<dynamic, UserManagementState, UserManagementStateHarness>(log, async (mgr, reqData) =>
             {
                 log.LogInformation($"Requesting user access...");
 
-                await mgr.GrantAccess(reqData.AccessToken);
+                await mgr.GrantAccess(req.Query["token"].ToString());
 
                 return await mgr.WhenAll(
                 );

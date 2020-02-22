@@ -42,6 +42,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
         protected readonly IdentityManagerClient idMgr;
 
+        private readonly List<string> TempAdmins = new List<string>() { "matt.brooks@fathym.com" };
+
         #endregion
         public UserManagementStateHarness(HttpRequest req, ILogger log, UserManagementState state)
             : base(req, log, state)
@@ -98,23 +100,22 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             // Query graph for admins of enterprise ID
             var admins = idMgr.ListAdmins(enterpriseId);
 
-            var tempAdmins = new List<string>(){ "matt.brooks@fathym.com" };
-
+            var adminEmails = (admins.Result?.Model == null)? this.TempAdmins : admins.Result.Model;
+            
             // Build grant/deny links and text body
             //if ((response != null) && (admins.Result != null))
             if (response != null)
             {
-                string grantLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/grant/token?={response.Model}\">Grant Access</a>";
-                string denyLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/deny/token?={response.Model}\">Deny Access</a>";
+                string grantLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/api/GrantUserAccess?token={response.Model}\">Grant Access</a>";
+                string denyLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/api/DenyUserAccess?token={response.Model}\">Deny Access</a>";
                 string emailHtml = $"A user has requested access to this Organization : {grantLink} {denyLink}";                
 
                 // Send email from app manager client 
-                //foreach (string admin in admins.Result.Model)
-                foreach (string admin in tempAdmins)
+                foreach (string admin in adminEmails)
                 {
                     var email = new AccessRequestEmail()
                     {
-                        Content = emailHtml,
+                        Content = String.Empty,
                         EmailFrom = "admin@fathym.com",
                         EmailTo = admin,
                         User = details.Username,
@@ -123,7 +124,9 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                     };
 
                     var emailModel = new MetadataModel();
-                    emailModel.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", JToken.Parse(JsonConvert.SerializeObject(email))));
+
+                    var jemail = JToken.Parse(JsonConvert.SerializeObject(email));
+                   // emailModel.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", jemail));
     
                     await appMgr.SendAccessRequestEmail(emailModel, details.EnterpriseAPIKey);
                 }
