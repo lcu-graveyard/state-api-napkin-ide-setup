@@ -115,7 +115,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                 {
                     var email = new AccessRequestEmail()
                     {
-                        Content = String.Empty,
+                        Content = emailHtml,
                         EmailFrom = "admin@fathym.com",
                         EmailTo = admin,
                         User = details.Username,
@@ -125,8 +125,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
 
                     var emailModel = new MetadataModel();
 
-                    var jemail = JToken.Parse(JsonConvert.SerializeObject(email));
-                   // emailModel.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", jemail));
+                    emailModel.Metadata.Add(new KeyValuePair<string, JToken>("AccessRequestEmail", JToken.Parse(JsonConvert.SerializeObject(email))));
     
                     await appMgr.SendAccessRequestEmail(emailModel, details.EnterpriseAPIKey);
                 }
