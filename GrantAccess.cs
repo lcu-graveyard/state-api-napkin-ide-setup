@@ -25,7 +25,7 @@ namespace LCU.State.API.NapkinIDE.Setup
 
     public static class GrantAccess
     {
-        [FunctionName("GrantAccess")]
+        [FunctionName("GrantUserAccess")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post", Route = null)] HttpRequest req,
             ILogger log)
