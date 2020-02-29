@@ -25,6 +25,7 @@ using LCU.Personas.Security;
 using LCU;
 using Newtonsoft.Json;
 using LCU.Personas.Client.Identity;
+using System.Text;
 
 namespace LCU.State.API.NapkinIDE.Setup.Harness
 {
@@ -89,7 +90,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
                 Payload = model,
                 UserEmail = details.Username,
                 OrganizationID = enterpriseId,
-                Encrypt = true
+                Encrypt = true,
+                DaysValid = 7
             };
 
             // Encrypt user email and enterpries ID, generate token
@@ -100,14 +102,23 @@ namespace LCU.State.API.NapkinIDE.Setup.Harness
             // Query graph for admins of enterprise ID
             var admins = idMgr.ListAdmins(enterpriseId);
 
-            var adminEmails = (admins.Result?.Model == null)? this.TempAdmins : admins.Result.Model;
+            var adminEmails = this.TempAdmins;
+           // var adminEmails = (admins.Result?.Model == null)? this.TempAdmins : admins.Result.Model;
             
             // Build grant/deny links and text body
-            //if ((response != null) && (admins.Result != null))
             if (response != null)
             {
-                string grantLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/api/GrantUserAccess?token={response.Model}\">Grant Access</a>";
-                string denyLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/api/DenyUserAccess?token={response.Model}\">Deny Access</a>";
+                var querySb = new StringBuilder();
+                
+                querySb.Append($"token={response.Model}");
+                querySb.Append($"&lcu-app-ent-api-key=test-app");
+                querySb.Append($"&username={details.Username}");
+                querySb.Append($"&state=napkin-ide-setup");
+                querySb.Append($"&appEntApiKey={details.EnterpriseAPIKey}");
+                querySb.Append($"&entApiKey={details.EnterpriseAPIKey}");
+
+                string grantLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/api/GrantUserAccess?{querySb.ToString()}\">Grant Access</a>";
+                string denyLink = $"<a href=\"{req.Scheme}://{req.Host.ToString()}/api/DenyUserAccess?{querySb.ToString()}\">Deny Access</a>";
                 string emailHtml = $"A user has requested access to this Organization : {grantLink} {denyLink}";                
 
                 // Send email from app manager client 

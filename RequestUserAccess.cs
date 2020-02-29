@@ -15,26 +15,20 @@ using System.Collections.Generic;
 
 namespace LCU.State.API.UserManagement
 {
-    // [DataContract]
-    // public class RequestUserAccessRequest
-    // {
-    // }
 
     public static class RequestUserAccess
     {
         [FunctionName("RequestUserAccess")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Admin, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             return await req.Manage<dynamic, UserManagementState, UserManagementStateHarness>(log, async (mgr, reqData) =>
             {
                 log.LogInformation($"Requesting user access...");
 
-                await mgr.RequestAuthorization();
+                return await mgr.RequestAuthorization();
 
-                return await mgr.WhenAll(
-                );
             });
         }
     }
