@@ -12,10 +12,7 @@
             "command": "dotnet build",
             "type": "shell",
             "dependsOn": "clean",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": "$msCompile"
         },
         {
@@ -29,7 +26,11 @@
             "command": "dotnet publish --configuration Release",
             "type": "shell",
             "dependsOn": "clean release",
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "type": "func",

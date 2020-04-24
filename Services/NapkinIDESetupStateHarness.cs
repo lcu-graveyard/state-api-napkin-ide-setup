@@ -45,6 +45,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
             entMgr = req.ResolveClient<EnterpriseManagerClient>(logger);
 
             idMgr = req.ResolveClient<IdentityManagerClient>(logger);
+
+            state.SetupError = "";
         }
         #endregion
 
@@ -87,57 +89,17 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                     var envResp = await devOpsArch.SetupEnvironment(new SetupEnvironmentRequest()
                     {
                         EnvSettings = state.EnvSettings,
-                        Template = "fathym\\daf-iot-setup",
+                        Template = "fathym\\daf-state-setup",
+                        // Template = "fathym\\daf-iot-setup",
                         OrganizationLookup = state.OrganizationLookup
                     }, state.NewEnterpriseAPIKey, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey);
+
+                    if (!envResp.Status)
+                        state.SetupError = envResp.Status.Message;
 
                     state.EnvironmentLookup = envResp.Model?.Lookup;
 
                     state.EnterpriseBooted = envResp.Status;
-
-                    // var doProj = await devOpsArch.EnsureDevOpsProject(state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
-
-                    // if (doProj.Status)
-                    // {
-                    //     var envResp = await devOpsArch.EnsureEnvironment(new EnsureEnvironmentRequest()
-                    //     {
-                    //         EnvSettings = state.EnvSettings,
-                    //         OrganizationLookup = state.OrganizationLookup
-                    //     }, state.NewEnterpriseAPIKey);
-
-                    //     if (envResp.Status)
-                    //     {
-                    //         var env = envResp.Model;
-
-                    //         var infraRepoResp = await devOpsArch.EnsureInfrastructureRepo(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
-
-                    //         var lcuFeedResp = await devOpsArch.EnsureLCUFeed(new EnsureLCUFeedRequest()
-                    //         {
-                    //             EnvironmentLookup = env.Lookup
-                    //         }, state.NewEnterpriseAPIKey, details.Username, details.EnterpriseAPIKey);
-
-                    //         if (lcuFeedResp.Status)
-                    //         {
-                    //             var taskLibraryResp = await devOpsArch.EnsureTaskTlibrary(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey, doProj.Model);
-
-                    //             if (taskLibraryResp.Status)
-                    //             {
-                    //                 var buildReleaseResp = await devOpsArch.EnsureInfrastructureBuildAndRelease(state.NewEnterpriseAPIKey, details.Username, env.Lookup, details.EnterpriseAPIKey,
-                    //                     doProj.Model);
-
-                    //                 if (buildReleaseResp.Status)
-                    //                 {
-                    //                     var envInfra = await devOpsArch.SetEnvironmentInfrastructure(new SetEnvironmentInfrastructureRequest()
-                    //                     {
-                    //                         Template = "fathym\\daf-state-setup"
-                    //                     }, state.NewEnterpriseAPIKey, env.Lookup, details.Username, details.EnterpriseAPIKey);
-
-                    //                     state.EnterpriseBooted = envInfra.Status;
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                    // }
                 }
             }
 
@@ -203,6 +165,17 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
 
                             if (runtimeEnsured.Status)
                             {
+                                logger.LogInformation("Setting up final steps");
+
+                                await devOpsArch.SetEnvironmentInfrastructure(new Personas.DevOps.SetEnvironmentInfrastructureRequest()
+                                {
+                                    Template = "fathym\\daf-iot-setup"
+                                }, state.NewEnterpriseAPIKey, state.EnvironmentLookup, details.Username, devOpsEntApiKey: details.EnterpriseAPIKey);
+
+                                await appDev.ConfigureNapkinIDEForDataApps(state.NewEnterpriseAPIKey, state.Host);
+
+                                await appDev.ConfigureNapkinIDEForDataFlows(state.NewEnterpriseAPIKey, state.Host);
+
                                 state.Step = NapkinIDESetupStepTypes.Complete;
                             }
                         }
@@ -229,8 +202,8 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 "style=\"flex-direction: row; box-sizing: border-box; display: flex; place-content: flex-start space-around; align-items: flex-start;\">" +
                 "<div _ngcontent-trf-c16=\"\" fxflex=\"50%\" ng-reflect-fx-flex=\"50%\"" +
                 "style=\"margin-right: 50px; flex: 1 1 100%; box-sizing: border-box; max-width: 50%;\">" +
-                "<p _ngcontent-trf-c16=\"\">By continuting through this step and accepting, you agree to enter into and be " +
-                "bound by the Enterprise Agreement located at:</p><a _ngcontent-trf-c16=\"\"" +
+                "<p _ngcontent-trf-c16=\"\">By continuting through this step, you agree to enter in to and be " +
+                "bound by the Enterprise Agreement:</p><a _ngcontent-trf-c16=\"\"" +
                 "href=\"https://fathym.com/enterprise-agreement/\" target=\"blank\"><button _ngcontent-trf-c16=\"\"" +
                 "class=\"mat-full-width mat-button mat-button-base mat-warn\" color=\"warn\" mat-button=\"\"" +
                 "ng-reflect-color=\"warn\"><span class=\"mat-button-wrapper\"> Enterprise Agreement </span>" +
@@ -241,7 +214,7 @@ namespace LCU.State.API.NapkinIDE.Setup.Services
                 "</div><br _ngcontent-trf-c16=\"\" style=\"margin-right: 50px;\">" +
                 "<div _ngcontent-trf-c16=\"\" fxflex=\"50%\" ng-reflect-fx-flex=\"50%\"" +
                 "style=\"flex: 1 1 100%; box-sizing: border-box; max-width: 50%;\">" +
-                "<p _ngcontent-trf-c16=\"\">By clicking Accept you also accept Fathym's Terms and Conditions: </p><a " +
+                "<p _ngcontent-trf-c16=\"\">By clicking Accept you accept and agree to Fathym's Terms and Conditions: </p><a " +
                 "_ngcontent-trf-c16=\"\" href=\"https://fathym.com/terms-of-services/\" target=\"blank\"><button " +
                 "_ngcontent-trf-c16=\"\" class=\"mat-full-width mat-button mat-button-base mat-warn\" color=\"warn\"" +
                 "mat-button=\"\" ng-reflect-color=\"warn\"><span class=\"mat-button-wrapper\"> Terms &amp; Conditions" +
